@@ -142,35 +142,24 @@ function App() {
     try {
       await Promise.all([loadScenarios(), loadWorld(), loadRun()]);
     } catch (err) {
-      setError((err as Error).message || 'Failed to refresh data');
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function fetchJson<T>(path: string, init?: RequestInit, failureMessage?: string): Promise<T> {
-    const headers: HeadersInit = {
-      Accept: 'application/json',
-      ...(init?.headers ?? {})
-    };
-
-    const res = await fetch(path, { cache: 'no-store', ...init, headers });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => '');
-      const base = failureMessage || `Request to ${path} failed`;
-      throw new Error(`${base}: ${res.status} ${res.statusText}${detail ? ` - ${detail}` : ''}`);
-    }
-    return res.json() as Promise<T>;
-  }
-
   async function loadScenarios() {
-    const data = await fetchJson<{ scenarios: Scenario[]; current?: Scenario }>('/api/scenarios', undefined, 'Failed to load scenarios');
+    const res = await fetch('/api/scenarios');
+    if (!res.ok) throw new Error('Failed to load scenarios');
+    const data = await res.json();
     setScenarios(data.scenarios || []);
     if (data.current) setCurrentScenario(data.current);
   }
 
   async function loadWorld() {
-    const data = await fetchJson<{ world: WorldState; scenario?: Scenario }>('/api/world', undefined, 'Failed to load world');
+    const res = await fetch('/api/world');
+    if (!res.ok) throw new Error('Failed to load world');
+    const data = await res.json();
     setWorld(data.world);
     if (data.scenario) setCurrentScenario(data.scenario);
     setNarration(null);
@@ -178,7 +167,9 @@ function App() {
   }
 
   async function loadRun() {
-    const data = await fetchJson<{ log: RunLog; metrics: RunMetrics; scenario?: Scenario }>('/api/run', undefined, 'Failed to load run');
+    const res = await fetch('/api/run');
+    if (!res.ok) throw new Error('Failed to load run');
+    const data = await res.json();
     setRunLog(data.log);
     setRunMetrics(data.metrics);
     if (data.scenario) setCurrentScenario(data.scenario);
@@ -188,11 +179,9 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchJson<{ world: WorldState; run: RunLog; metrics: RunMetrics; scenario?: Scenario }>(
-        '/api/world/reset',
-        { method: 'POST' },
-        'Failed to reset world'
-      );
+      const res = await fetch('/api/world/reset', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to reset world');
+      const data = await res.json();
       setWorld(data.world);
       setRunLog(data.run);
       setRunMetrics(data.metrics);
@@ -210,11 +199,9 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchJson<{ world: WorldState; run: RunLog; metrics: RunMetrics; scenario?: Scenario }>(
-        '/api/run/reset',
-        { method: 'POST' },
-        'Failed to reset run log'
-      );
+      const res = await fetch('/api/run/reset', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to reset run log');
+      const data = await res.json();
       setWorld(data.world);
       setRunLog(data.run);
       setRunMetrics(data.metrics);
@@ -232,23 +219,14 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchJson<{
-        result: SimulationStepResult;
-        narration: NarrationResult;
-        run?: RunLog;
-        metrics?: RunMetrics;
-        scenario?: Scenario;
-      }>(
-        '/api/world/step',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(intervention)
-        },
-        'Intervention rejected'
-      );
-      if (!data.result?.applied) {
-        const warning = data?.result?.warnings?.join('; ') || 'Intervention rejected';
+      const res = await fetch('/api/world/step', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(intervention)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.result?.applied) {
+        const warning = data?.result?.warnings?.join('; ') || data?.error || 'Intervention rejected';
         throw new Error(warning);
       }
       const result: SimulationStepResult = data.result;
@@ -269,15 +247,13 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchJson<{ scenario: Scenario; world: WorldState; run: RunLog; metrics: RunMetrics }>(
-        '/api/scenarios/select',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        },
-        'Failed to switch scenario'
-      );
+      const res = await fetch('/api/scenarios/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) throw new Error('Failed to switch scenario');
+      const data = await res.json();
       setWorld(data.world);
       setRunLog(data.run);
       setRunMetrics(data.metrics);
@@ -296,15 +272,8 @@ function App() {
       <div className="app">
         <header>
           <h1>InkSim</h1>
-          <p>A literary world simulation lab</p>
+          <p>Loading world...</p>
         </header>
-        {error ? <div className="error">{error}</div> : <p className="status">Loading world...</p>}
-        <div className="actions">
-          <button onClick={refreshAll} disabled={loading}>
-            Retry
-          </button>
-        </div>
-        {loading && <div className="status">Working...</div>}
       </div>
     );
   }
