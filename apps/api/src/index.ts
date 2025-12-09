@@ -20,7 +20,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-codex/design-and-scaffold-inksim-project-a1yf0d
+
 app.disable('etag');
 
 
