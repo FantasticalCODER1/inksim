@@ -1,5 +1,26 @@
 {
+  "name": "inksim",
+  "version": "0.1.0",
+  "private": true,
+  "description": "InkSim monorepo - literary world simulation lab",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace apps/api run dev",
+    "build": "npm run build:packages && npm run build:web && npm run build:api",
+    "build:packages": "npm --workspace packages/core run build && npm --workspace packages/canon run build && npm --workspace packages/narrator run build",
+    "build:web": "npm --workspace apps/web run build",
+    "build:api": "npm --workspace apps/api run build",
+    "test": "npm run build:packages && npm --workspace packages/core run test && npm --workspace packages/canon run test && npm --workspace packages/narrator run test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
-    "@openai/codex": "^0.66.0"
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
   }
 }
