@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
+    "paths": {
+      "@inksim/core": ["packages/core/dist/index.d.ts"],
+      "@inksim/canon": ["packages/canon/dist/index.d.ts"],
+      "@inksim/narrator": ["packages/narrator/dist/index.d.ts"]
+    }
+  }
+}

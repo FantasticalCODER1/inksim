@@ -1,1 +1,9 @@
 node_modules
+npm-debug.log*
+dist
+.cache
+.vscode
+.DS_Store
+.env
+coverage
+*.tsbuildinfo
