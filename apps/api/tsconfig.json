@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "types": ["node"],
+    "paths": {
+      "@inksim/core": ["../../packages/core/dist/index.d.ts"],
+      "@inksim/canon": ["../../packages/canon/dist/index.d.ts"],
+      "@inksim/narrator": ["../../packages/narrator/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
